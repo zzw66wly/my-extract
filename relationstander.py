@@ -1,16 +1,16 @@
-# -*- coding: gbk -*-  # ÈôÎÄ¼şÊÇGBK±àÂë
-# »ò
-# coding=utf-8        # ÈôÎÄ¼şÊÇUTF-8±àÂë
+# -*- coding: gbk -*-  # è‹¥æ–‡ä»¶æ˜¯GBKç¼–ç 
+# æˆ–
+# coding=utf-8        # è‹¥æ–‡ä»¶æ˜¯UTF-8ç¼–ç 
 import json
 import re
 import requests
 import spacy
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ÔØÈë spaCy Ó¢ÎÄÄ£ĞÍ£¨×¢ÒâĞèÒªÏÈ°²×° en_core_web_sm£©
+# è½½å…¥ spaCy è‹±æ–‡æ¨¡å‹ï¼ˆæ³¨æ„éœ€è¦å…ˆå®‰è£… en_core_web_smï¼‰
 nlp = spacy.load("en_core_web_sm")
 
-API_KEY = "sk-rqwfjiemkmtyloodorsmcdrmtovacdvigurlfrfrttptivhc"
+API_KEY = ""
 URL = "https://api.siliconflow.cn/v1/chat/completions"
 HEADERS = {
     "Authorization": f"Bearer {API_KEY}",
@@ -23,7 +23,7 @@ RELATION_SET = [
     "directly_interacts"
 ]
 
-# ---------------- ¹æÔòÆ¥Åä ----------------
+# ---------------- è§„åˆ™åŒ¹é… ----------------
 def rule_match_relation(relation):
     text = relation.lower()
 
@@ -51,15 +51,15 @@ def rule_match_relation(relation):
 
     return None
 
-# ---------------- ±»¶¯ÓïÌ¬ÅĞ¶Ï£¨spacy£© ----------------
+# ---------------- è¢«åŠ¨è¯­æ€åˆ¤æ–­ï¼ˆspacyï¼‰ ----------------
 def is_passive_voice(phrase):
     doc = nlp(phrase)
     for token in doc:
-        if token.dep_ == "auxpass":  # ±»¶¯ÓïÌ¬Öú¶¯´Ê
+        if token.dep_ == "auxpass":  # è¢«åŠ¨è¯­æ€åŠ©åŠ¨è¯
             return True
     return False
 
-# ---------------- API µ÷ÓÃ£º¹ØÏµ±ê×¼»¯ ----------------
+# ---------------- API è°ƒç”¨ï¼šå…³ç³»æ ‡å‡†åŒ– ----------------
 def normalize_relation_api(relation):
     prompt = f"""
 You are a biomedical relation normalizer.
@@ -109,10 +109,10 @@ Output:
         result = content.strip().splitlines()[0]
         return result if result in RELATION_SET else "others"
     except Exception as e:
-        print(f"[!!] API ±ê×¼»¯Ê§°Ü: {relation} -> {e}")
+        print(f"[!!] API æ ‡å‡†åŒ–å¤±è´¥: {relation} -> {e}")
         return "others"
 
-# ---------------- Ö÷º¯Êı ----------------
+# ---------------- ä¸»å‡½æ•° ----------------
 def normalize_triples_with_relations(input_path, output_path, max_workers=3):
     with open(input_path, encoding="utf-8") as f:
         raw_data = json.load(f)
@@ -129,7 +129,7 @@ def normalize_triples_with_relations(input_path, output_path, max_workers=3):
 
     for r in all_relations:
         rule_result = rule_match_relation(r)
-        passive_map[r] = is_passive_voice(r)  # ÔÚ±ê×¼»¯Ç°ÌáÈ¡
+        passive_map[r] = is_passive_voice(r)  # åœ¨æ ‡å‡†åŒ–å‰æå–
         if rule_result:
             relation_cache[r.lower()] = rule_result
         else:
@@ -174,7 +174,8 @@ def normalize_triples_with_relations(input_path, output_path, max_workers=3):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(normalized, f, indent=2, ensure_ascii=False)
 
-    print(f"[?] Íê³É±ê×¼»¯£º×Ü¼Æ {len(normalized)} Ìõ¹ØÏµ¡£")
+    print(f"[?] å®Œæˆæ ‡å‡†åŒ–ï¼šæ€»è®¡ {len(normalized)} æ¡å…³ç³»ã€‚")
+
 
 
 

@@ -1,12 +1,12 @@
-# -*- coding: gbk -*-  # ÈôÎÄ¼şÊÇGBK±àÂë
-# »ò
-# coding=utf-8        # ÈôÎÄ¼şÊÇUTF-8±àÂë
+# -*- coding: gbk -*-  # è‹¥æ–‡ä»¶æ˜¯GBKç¼–ç 
+# æˆ–
+# coding=utf-8        # è‹¥æ–‡ä»¶æ˜¯UTF-8ç¼–ç 
 import pandas as pd
 import requests
 import json
 import time
 
-API_KEY = "sk-klgidfnfvyaetinrtnkblzicwoaztxgkmlfnnpbbvcspzehv"
+API_KEY = ""
 headers = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
@@ -28,7 +28,7 @@ Follow these guidelines:
 
 DO NOT output relation verbs like "improves", "enhances", "represses", etc. These must always be normalized to the closest match from the list above.
 
-4. Handle complex entities with special symbols (e.g., "TGF-¦Â1" as single entity)
+4. Handle complex entities with special symbols (e.g., "TGF-Î²1" as single entity)
 5. Resolve coreferences (e.g., "this protein" refers to previous entity)
 6. Entity Recognition Standards:Use standardized biological nomenclature (e.g. ,"EGFR" instead of "epidermal growth factor receptor gene")
 7. Relation normalization (map synonymous phrases):
@@ -89,7 +89,7 @@ def extract_triples(text):
         "stream": False,
         "max_tokens": 3000
     }
-    for _ in range(3):  # ÖØÊÔ»úÖÆ
+    for _ in range(3):  # é‡è¯•æœºåˆ¶
         try:
             r = requests.request("POST", url, json=payload, headers=headers)
             output = r.json()
@@ -108,22 +108,22 @@ def extract_triples_from_csv(input_csv, output_json, top_n=10, max_workers=3):
     df = df[df["abstract_text"].notnull()].iloc[:top_n]
     all_triples = []
 
-    # Ê¹ÓÃÏß³Ì³Ø²¢ĞĞ´¦Àí
+    # ä½¿ç”¨çº¿ç¨‹æ± å¹¶è¡Œå¤„ç†
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Ìá½»ËùÓĞÈÎÎñ
+        # æäº¤æ‰€æœ‰ä»»åŠ¡
         future_to_text = {
             executor.submit(extract_triples, text): text
             for text in df["abstract_text"]
         }
 
-        # Òì²½ÊÕ¼¯½á¹û
+        # å¼‚æ­¥æ”¶é›†ç»“æœ
         for future in concurrent.futures.as_completed(future_to_text):
             try:
                 triples = future.result()
                 all_triples.extend(triples)
             except Exception as e:
-                print(f"´¦ÀíÊ§°Ü: {str(e)}")
+                print(f"å¤„ç†å¤±è´¥: {str(e)}")
 
-    # ±£´æ½á¹û
+    # ä¿å­˜ç»“æœ
     with open(output_json, "w", encoding="utf-8") as f:
         json.dump(all_triples, f, indent=2, ensure_ascii=False)
